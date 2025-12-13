@@ -18,15 +18,21 @@ const inpArea = document.getElementById("inpArea");
 const modalTitle = document.getElementById("modalTitle");
 
 // =======================================================
+//  FEEDBACK SIMPLES (UX LIMPO)
+// =======================================================
+function feedback(msg) {
+  alert(msg);
+}
+
+// =======================================================
 //  ABRIR MODAL (NOVO OU EDITAR)
 // =======================================================
 window.openModal = function (index = -1) {
   editIndex = index;
+  const lista = PlantoesStore.get();
 
   if (index >= 0) {
-    const lista = PlantoesStore.get();
     const p = lista[index];
-
     modalTitle.textContent = "Editar Plantão";
 
     inpDate.value = p.date || "";
@@ -36,7 +42,6 @@ window.openModal = function (index = -1) {
     inpArea.value = p.area || "";
   } else {
     modalTitle.textContent = "Novo Plantão";
-
     inpDate.value = "";
     inpFarm.value = "";
     inpEnd.value = "";
@@ -53,7 +58,7 @@ modalBg.addEventListener("click", (e) => {
 });
 
 // =======================================================
-//  RENDERIZAR TABELA
+//  RENDERIZAR TABELA (ordenada por data)
 // =======================================================
 function renderTabela() {
   const lista = PlantoesStore.get() || [];
@@ -79,16 +84,21 @@ function renderTabela() {
 }
 
 // =======================================================
-//  EXCLUIR PLANTÃO
+//  EXCLUIR (CONFIRMAÇÃO MAIS CLARA)
 // =======================================================
 window.excluir = function (index) {
-  if (!confirm("Tem certeza que deseja excluir este plantão?")) return;
-
   const lista = PlantoesStore.get();
-  lista.splice(index, 1);
+  const p = lista[index];
 
+  const ok = confirm(
+    `Confirma a exclusão do plantão?\n\n${p.farmacia}\nData: ${p.date}`
+  );
+  if (!ok) return;
+
+  lista.splice(index, 1);
   PlantoesStore.set(lista);
   renderTabela();
+  feedback("Plantão excluído com sucesso.");
 };
 
 // =======================================================
@@ -103,8 +113,9 @@ window.savePlantao = function () {
     area: inpArea.value.trim().toUpperCase(),
   };
 
+  // Validação mínima (sem burocracia)
   if (!novo.date || !novo.farmacia || !novo.area) {
-    alert("Preencha data, farmácia e área.");
+    feedback("Preencha pelo menos: Data, Farmácia e Área.");
     return;
   }
 
@@ -112,15 +123,22 @@ window.savePlantao = function () {
 
   if (editIndex >= 0) {
     lista[editIndex] = novo;
+    feedback("Plantão atualizado com sucesso.");
   } else {
-    // evita duplicar mesma data
     const existe = lista.find(p => p.date === novo.date);
+
     if (existe) {
-      if (!confirm("Já existe plantão nessa data. Deseja substituir?")) return;
+      const substituir = confirm(
+        "Já existe um plantão cadastrado nessa data.\nDeseja substituir?"
+      );
+      if (!substituir) return;
+
       const idx = lista.findIndex(p => p.date === novo.date);
       lista[idx] = novo;
+      feedback("Plantão substituído com sucesso.");
     } else {
       lista.push(novo);
+      feedback("Plantão adicionado com sucesso.");
     }
   }
 
@@ -128,6 +146,13 @@ window.savePlantao = function () {
   modalBg.style.display = "none";
   renderTabela();
 };
+
+// =======================================================
+//  BASE PARA FUTUROS FILTROS (PRONTO)
+// =======================================================
+// Exemplo futuro:
+// function filtrarPorArea(area) { ... }
+// function filtrarPorMes(mes) { ... }
 
 // =======================================================
 //  INICIALIZAÇÃO
