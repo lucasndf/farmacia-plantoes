@@ -32,7 +32,7 @@ body {
 }
 
 h1 {
-  margin: 0 0 6px;
+  margin: 6px 0;
   font-size: 1.45rem;
 }
 
@@ -42,6 +42,16 @@ p {
   color: #9ca3af;
 }
 
+small.lock {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 6px;
+}
+
+/* ==============================
+   FORM
+   ============================== */
 label {
   font-size: 0.82rem;
   display: block;
@@ -49,11 +59,11 @@ label {
 }
 
 /* ==============================
-   INPUT PADRÃO (RETO E LIMPO)
+   INPUT PADRÃO
    ============================== */
 input {
   width: 100%;
-  height: 42px;          /* igual ao DevTools */
+  height: 42px;
   padding: 0 12px;
   border-radius: 8px;
   border: 1px solid #1f2937;
@@ -71,7 +81,7 @@ input:focus {
 }
 
 /* ==============================
-   AUTOFILL (CONTROLADO)
+   AUTOFILL CONTROLADO
    ============================== */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -83,7 +93,7 @@ input:-webkit-autofill:focus {
 }
 
 /* ==============================
-   SENHA + BOTÃO
+   SENHA + TOGGLE
    ============================== */
 .password-row {
   display: flex;
@@ -109,6 +119,11 @@ input:-webkit-autofill:focus {
 .toggle-btn:hover {
   color: #fff;
   border-color: #3b82f6;
+}
+
+.toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ==============================
@@ -160,17 +175,18 @@ a.voltar:hover {
 <body>
 
 <div class="card">
+  <small class="lock">🔒 Área restrita</small>
   <h1>Área administrativa</h1>
   <p>Acesso restrito ao administrador.</p>
 
-  <form id="loginForm">
-    <label>E-mail</label>
-    <input type="email" id="email" required autocomplete="email" />
+  <form id="loginForm" novalidate>
+    <label for="email">E-mail</label>
+    <input id="email" type="email" required autocomplete="email" />
 
-    <label>Senha</label>
+    <label for="senha">Senha</label>
     <div class="password-row">
-      <input type="password" id="senha" required autocomplete="current-password" />
-      <button type="button" class="toggle-btn" id="toggle">👁</button>
+      <input id="senha" type="password" required autocomplete="current-password" />
+      <button type="button" class="toggle-btn" id="toggle" disabled>Ver</button>
     </div>
 
     <button class="login" id="btnLogin">Entrar</button>
@@ -195,15 +211,38 @@ firebase.initializeApp({
 });
 
 const auth = firebase.auth();
+
 const form = document.getElementById("loginForm");
 const btn = document.getElementById("btnLogin");
 const msg = document.getElementById("msg");
 const toggle = document.getElementById("toggle");
 const senha = document.getElementById("senha");
+const email = document.getElementById("email");
 
+let isSubmitting = false;
+
+/* 🔒 Se já estiver logado, pula login */
+auth.onAuthStateChanged(user => {
+  if (user) location.href = "painel.html";
+});
+
+/* Toggle senha */
+senha.addEventListener("input", () => {
+  toggle.disabled = !senha.value;
+});
+
+toggle.onclick = () => {
+  senha.type = senha.type === "password" ? "text" : "password";
+  toggle.textContent = senha.type === "password" ? "Ver" : "Ocultar";
+};
+
+/* Submit */
 form.addEventListener("submit", async e => {
   e.preventDefault();
+  if (isSubmitting) return;
+
   msg.textContent = "";
+  isSubmitting = true;
   btn.textContent = "Entrando...";
   btn.disabled = true;
 
@@ -214,15 +253,12 @@ form.addEventListener("submit", async e => {
     );
     location.href = "painel.html";
   } catch {
-    msg.textContent = "E-mail ou senha inválidos.";
+    msg.textContent = "Não foi possível entrar. Verifique o e-mail e a senha.";
     btn.textContent = "Entrar";
     btn.disabled = false;
+    isSubmitting = false;
   }
 });
-
-toggle.onclick = () => {
-  senha.type = senha.type === "password" ? "text" : "password";
-};
 </script>
 
 </body>
