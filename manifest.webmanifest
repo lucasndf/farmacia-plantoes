@@ -1,0 +1,22 @@
+{
+  "name": "Farmácia de Plantão - Patos PB",
+  "short_name": "Plantão Patos",
+  "description": "Veja rapidamente qual farmácia está de plantão hoje em Patos-PB.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050812",
+  "theme_color": "#050812",
+  "icons": [
+    {
+      "src": "/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
