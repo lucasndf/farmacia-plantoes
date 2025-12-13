@@ -6,7 +6,7 @@
 let editIndex = -1;
 
 // ELEMENTOS DO PAINEL
-const tabela = document.getElementById("tabela").querySelector("tbody");
+const tabela = document.querySelector("#tabela tbody");
 const modalBg = document.getElementById("modalBg");
 
 const inpDate = document.getElementById("inpDate");
@@ -29,11 +29,11 @@ window.openModal = function (index = -1) {
 
     modalTitle.textContent = "Editar Plantão";
 
-    inpDate.value = p.date;
-    inpFarm.value = p.farmacia;
-    inpEnd.value = p.endereco;
-    inpTel.value = p.telefone;
-    inpArea.value = p.area;
+    inpDate.value = p.date || "";
+    inpFarm.value = p.farmacia || "";
+    inpEnd.value = p.endereco || "";
+    inpTel.value = p.telefone || "";
+    inpArea.value = p.area || "";
   } else {
     modalTitle.textContent = "Novo Plantão";
 
@@ -56,9 +56,10 @@ modalBg.addEventListener("click", (e) => {
 //  RENDERIZAR TABELA
 // =======================================================
 function renderTabela() {
-  const lista = PlantoesStore.get();
+  const lista = PlantoesStore.get() || [];
 
   tabela.innerHTML = lista
+    .slice()
     .sort((a, b) => a.date.localeCompare(b.date))
     .map(
       (p, i) => `
@@ -66,13 +67,13 @@ function renderTabela() {
         <td>${p.date}</td>
         <td>${p.farmacia}</td>
         <td>${p.area}</td>
-        <td>${p.telefone}</td>
+        <td>${p.telefone || "-"}</td>
         <td>
           <button class="btn-small" onclick="openModal(${i})">Editar</button>
           <button class="btn-small" onclick="excluir(${i})">Excluir</button>
         </td>
       </tr>
-`
+    `
     )
     .join("");
 }
@@ -112,7 +113,15 @@ window.savePlantao = function () {
   if (editIndex >= 0) {
     lista[editIndex] = novo;
   } else {
-    lista.push(novo);
+    // evita duplicar mesma data
+    const existe = lista.find(p => p.date === novo.date);
+    if (existe) {
+      if (!confirm("Já existe plantão nessa data. Deseja substituir?")) return;
+      const idx = lista.findIndex(p => p.date === novo.date);
+      lista[idx] = novo;
+    } else {
+      lista.push(novo);
+    }
   }
 
   PlantoesStore.set(lista);
