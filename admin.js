@@ -17,22 +17,20 @@ const inpArea = document.getElementById("inpArea");
 
 const modalTitle = document.getElementById("modalTitle");
 
-// =======================================================
-//  FEEDBACK SIMPLES (UX LIMPO)
-// =======================================================
-function feedback(msg) {
-  alert(msg);
-}
+// IMPORTAÇÃO
+const modalImportBg = document.getElementById("modalImportBg");
+const importTextarea = document.getElementById("importTextarea");
 
 // =======================================================
 //  ABRIR MODAL (NOVO OU EDITAR)
 // =======================================================
 window.openModal = function (index = -1) {
   editIndex = index;
-  const lista = PlantoesStore.get();
 
   if (index >= 0) {
+    const lista = PlantoesStore.get();
     const p = lista[index];
+
     modalTitle.textContent = "Editar Plantão";
 
     inpDate.value = p.date || "";
@@ -42,6 +40,7 @@ window.openModal = function (index = -1) {
     inpArea.value = p.area || "";
   } else {
     modalTitle.textContent = "Novo Plantão";
+
     inpDate.value = "";
     inpFarm.value = "";
     inpEnd.value = "";
@@ -52,13 +51,13 @@ window.openModal = function (index = -1) {
   modalBg.style.display = "flex";
 };
 
-// Fechar modal clicando no fundo
+// Fechar modal clicando fora
 modalBg.addEventListener("click", (e) => {
   if (e.target === modalBg) modalBg.style.display = "none";
 });
 
 // =======================================================
-//  RENDERIZAR TABELA (ordenada por data)
+//  RENDERIZAR TABELA (ORDENADA POR DATA)
 // =======================================================
 function renderTabela() {
   const lista = PlantoesStore.get() || [];
@@ -84,21 +83,23 @@ function renderTabela() {
 }
 
 // =======================================================
-//  EXCLUIR (CONFIRMAÇÃO MAIS CLARA)
+//  EXCLUIR PLANTÃO (CONFIRMAÇÃO CLARA)
 // =======================================================
 window.excluir = function (index) {
   const lista = PlantoesStore.get();
   const p = lista[index];
 
   const ok = confirm(
-    `Confirma a exclusão do plantão?\n\n${p.farmacia}\nData: ${p.date}`
+    `Deseja realmente excluir o plantão?\n\n📅 ${p.date}\n🏥 ${p.farmacia}`
   );
+
   if (!ok) return;
 
   lista.splice(index, 1);
   PlantoesStore.set(lista);
   renderTabela();
-  feedback("Plantão excluído com sucesso.");
+
+  alert("Plantão excluído com sucesso.");
 };
 
 // =======================================================
@@ -113,9 +114,9 @@ window.savePlantao = function () {
     area: inpArea.value.trim().toUpperCase(),
   };
 
-  // Validação mínima (sem burocracia)
+  // VALIDAÇÃO MÍNIMA
   if (!novo.date || !novo.farmacia || !novo.area) {
-    feedback("Preencha pelo menos: Data, Farmácia e Área.");
+    alert("Preencha pelo menos Data, Farmácia e Área.");
     return;
   }
 
@@ -123,36 +124,77 @@ window.savePlantao = function () {
 
   if (editIndex >= 0) {
     lista[editIndex] = novo;
-    feedback("Plantão atualizado com sucesso.");
   } else {
+    // Evita duplicar mesma data
     const existe = lista.find(p => p.date === novo.date);
 
     if (existe) {
-      const substituir = confirm(
-        "Já existe um plantão cadastrado nessa data.\nDeseja substituir?"
+      const ok = confirm(
+        "Já existe um plantão nesta data.\nDeseja substituir?"
       );
-      if (!substituir) return;
+      if (!ok) return;
 
       const idx = lista.findIndex(p => p.date === novo.date);
       lista[idx] = novo;
-      feedback("Plantão substituído com sucesso.");
     } else {
       lista.push(novo);
-      feedback("Plantão adicionado com sucesso.");
     }
   }
 
   PlantoesStore.set(lista);
   modalBg.style.display = "none";
   renderTabela();
+
+  alert("Plantão salvo com sucesso.");
 };
 
 // =======================================================
-//  BASE PARA FUTUROS FILTROS (PRONTO)
+//  IMPORTAR LISTA (JSON)
 // =======================================================
-// Exemplo futuro:
-// function filtrarPorArea(area) { ... }
-// function filtrarPorMes(mes) { ... }
+window.openImportModal = function () {
+  importTextarea.value = "";
+  modalImportBg.style.display = "flex";
+};
+
+modalImportBg.addEventListener("click", (e) => {
+  if (e.target === modalImportBg) modalImportBg.style.display = "none";
+});
+
+window.importarLista = function () {
+  const texto = importTextarea.value.trim();
+
+  if (!texto) {
+    alert("Cole o JSON da lista de plantões.");
+    return;
+  }
+
+  try {
+    const json = JSON.parse(texto);
+
+    if (!Array.isArray(json)) throw new Error();
+
+    const atuais = PlantoesStore.get();
+    const mapa = {};
+
+    // mantém os atuais
+    atuais.forEach(p => mapa[p.date] = p);
+
+    // sobrescreve com os importados
+    json.forEach(p => {
+      if (p.date && p.farmacia && p.area) {
+        mapa[p.date] = p;
+      }
+    });
+
+    PlantoesStore.set(Object.values(mapa));
+    modalImportBg.style.display = "none";
+    renderTabela();
+
+    alert("Lista importada com sucesso!");
+  } catch {
+    alert("JSON inválido. Verifique o formato.");
+  }
+};
 
 // =======================================================
 //  INICIALIZAÇÃO
