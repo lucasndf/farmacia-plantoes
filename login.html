@@ -49,17 +49,18 @@ label {
 }
 
 /* ==============================
-   INPUTS (EMAIL E SENHA IGUAIS)
+   INPUT PADRÃO (RETO E LIMPO)
    ============================== */
 input {
   width: 100%;
-  height: 54px;
-  padding: 0 16px;
-  border-radius: 14px;
+  height: 42px;          /* igual ao DevTools */
+  padding: 0 12px;
+  border-radius: 8px;
   border: 1px solid #1f2937;
   background: #020617;
   color: #e5e7eb;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  box-sizing: border-box;
   margin-bottom: 16px;
 }
 
@@ -70,25 +71,23 @@ input:focus {
 }
 
 /* ==============================
-   CORREÇÃO DEFINITIVA DO AUTOFILL
+   AUTOFILL (CONTROLADO)
    ============================== */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #020617 inset !important;
+input:-webkit-autofill:focus {
   -webkit-text-fill-color: #e5e7eb !important;
-  caret-color: #e5e7eb;
-  border-radius: 14px;
+  -webkit-box-shadow: 0 0 0 1000px #020617 inset !important;
   transition: background-color 9999s ease-in-out 0s;
+  border-radius: 8px;
 }
 
 /* ==============================
-   SENHA COM BOTÃO EXTERNO
+   SENHA + BOTÃO
    ============================== */
 .password-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
@@ -98,14 +97,13 @@ input:-webkit-autofill:active {
 }
 
 .toggle-btn {
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
   border: 1px solid #1f2937;
   background: #020617;
   color: #9ca3af;
   cursor: pointer;
-  font-size: 0.85rem;
 }
 
 .toggle-btn:hover {
@@ -118,15 +116,14 @@ input:-webkit-autofill:active {
    ============================== */
 button.login {
   width: 100%;
-  height: 54px;
+  height: 44px;
   border-radius: 999px;
   border: none;
   background: linear-gradient(180deg, #3b82f6, #2563eb);
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 6px;
 }
 
 button.login:disabled {
@@ -157,13 +154,6 @@ a.voltar {
 a.voltar:hover {
   color: #3b82f6;
 }
-
-/* MOBILE */
-@media (max-width: 480px) {
-  .card {
-    padding: 24px 20px;
-  }
-}
 </style>
 </head>
 
@@ -173,7 +163,7 @@ a.voltar:hover {
   <h1>Área administrativa</h1>
   <p>Acesso restrito ao administrador.</p>
 
-  <form id="loginForm" autocomplete="on">
+  <form id="loginForm">
     <label>E-mail</label>
     <input type="email" id="email" required autocomplete="email" />
 
@@ -208,6 +198,8 @@ const auth = firebase.auth();
 const form = document.getElementById("loginForm");
 const btn = document.getElementById("btnLogin");
 const msg = document.getElementById("msg");
+const toggle = document.getElementById("toggle");
+const senha = document.getElementById("senha");
 
 form.addEventListener("submit", async e => {
   e.preventDefault();
