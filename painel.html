@@ -111,7 +111,6 @@ th {
   color: var(--text-muted);
   text-align: left;
   font-size: 0.85rem;
-  letter-spacing: 0.5px;
 }
 
 tr:hover {
@@ -133,7 +132,7 @@ tr:hover {
   color: #fff;
 }
 
-/* Modal geral */
+/* Modal */
 .modal-bg {
   position: fixed;
   inset: 0;
@@ -163,44 +162,19 @@ tr:hover {
   color: var(--text);
 }
 
-/* MOBILE */
+/* Mobile */
 @media (max-width: 768px) {
   body {
     flex-direction: column;
-    overflow-y: auto;
     height: auto;
   }
 
   .sidebar {
     width: 100%;
     flex-direction: row;
-    align-items: center;
     justify-content: space-between;
-    padding: 16px;
     border-right: none;
     border-bottom: 1px solid var(--border);
-  }
-
-  .sidebar h2 {
-    font-size: 1.3rem;
-  }
-
-  .sidebar button {
-    padding: 8px 14px;
-    font-size: 0.9rem;
-  }
-
-  .content {
-    padding: 16px;
-  }
-
-  .topbar h1 {
-    font-size: 1.25rem;
-  }
-
-  .btn-primary {
-    padding: 8px 14px;
-    font-size: 0.85rem;
   }
 
   table {
@@ -208,47 +182,42 @@ tr:hover {
     overflow-x: auto;
     white-space: nowrap;
   }
-
-  th, td {
-    padding: 8px;
-    font-size: 0.9rem;
-  }
 }
   </style>
 </head>
 
 <body>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>Admin</h2>
-    <button onclick="logout()">Sair</button>
-  </div>
-
-  <!-- Content -->
-  <div class="content">
-
-<div class="topbar">
-  <h1>Gerenciar Plantões</h1>
-
-  <div style="display:flex; gap:10px;">
-    <button class="btn-primary" onclick="openModal()">Adicionar Plantão</button>
-    <button class="btn-primary" onclick="openImportModal()">Importar Lista</button>
-  </div>
+<!-- Sidebar -->
+<div class="sidebar">
+  <h2>Admin</h2>
+  <button onclick="logout()">Sair</button>
 </div>
 
-<table id="tabela">
-  <thead>
-    <tr>
-      <th>Data</th>
-      <th>Farmácia</th>
-      <th>Área</th>
-      <th>Telefone</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<!-- Content -->
+<div class="content">
+
+  <div class="topbar">
+    <h1>Gerenciar Plantões</h1>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn-primary" onclick="openModal()">Adicionar Plantão</button>
+      <button class="btn-primary" onclick="openImportModal()">Importar Lista</button>
+    </div>
+  </div>
+
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Farmácia</th>
+        <th>Área</th>
+        <th>Telefone</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
 </div>
 
@@ -263,78 +232,80 @@ tr:hover {
     <input id="inpTel" type="text" placeholder="Telefone" />
     <input id="inpArea" type="text" placeholder="Área (CENTRO, NORTE...)" />
 
-    <button onclick="savePlantao()">Salvar</button>
+    <button class="btn-primary" onclick="savePlantao()">Salvar</button>
   </div>
 </div>
 
-<!-- Modal Importação -->
+<!-- Modal Import -->
 <div class="modal-bg" id="modalImportBg">
   <div class="modal">
     <h3>Importar lista de plantões</h3>
-    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
-      Cole aqui a lista em JSON. Novos dias serão adicionados sem apagar os atuais.
+    <p style="font-size:0.85rem; color:var(--text-muted)">
+      Cole o JSON completo. Datas iguais serão substituídas.
     </p>
 
     <textarea id="importTextarea" style="height:220px"></textarea>
 
-    <button onclick="importarLista()">Importar</button>
+    <button class="btn-primary" onclick="importarLista()">Importar</button>
   </div>
 </div>
 
+<!-- Firebase AUTH (compatível com login) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
 
-<!-- Firebase -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut }
- from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAhuIJT5TM0hT_m8S3zNEeZNmM8Ei2qOn8",
+    authDomain: "plantoes-patos.firebaseapp.com",
+    projectId: "plantoes-patos",
+    storageBucket: "plantoes-patos.firebasestorage.app",
+    messagingSenderId: "389722424174",
+    appId: "1:389722424174:web:efa844d12dbc48635b377f"
+  };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAhuIJT5TM0hT_m8S3zNEeZNmM8Ei2qOn8",
-  authDomain: "plantoes-patos.firebaseapp.com",
-  projectId: "plantoes-patos",
-  storageBucket: "plantoes-patos.firebasestorage.app",
-  messagingSenderId: "389722424174",
-  appId: "1:389722424174:web:efa844d12dbc48635b377f"
-};
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+  // 🔒 Proteção de acesso
+  auth.onAuthStateChanged(user => {
+    if (!user) window.location.href = "login.html";
+  });
 
-// bloqueia acesso sem login
-onAuthStateChanged(auth, user => {
-  if (!user) window.location.href = "login.html";
-});
-
-window.logout = () => signOut(auth);
+  function logout() {
+    auth.signOut().then(() => {
+      window.location.href = "login.html";
+    });
+  }
 </script>
 
-<!-- Banco local -->
-<script src="../assets/data.js"></script>
+<!-- Banco local (CORRIGIDO) -->
+<script src="data.js"></script>
 
-<!-- Admin.js -->
-<script src="./admin.js"></script>
+<!-- Admin -->
+<script src="admin.js"></script>
 
-<!-- SCRIPT IMPORTAÇÃO -->
+<!-- Importação -->
 <script>
 const modalImportBg = document.getElementById("modalImportBg");
 const importTextarea = document.getElementById("importTextarea");
 
-window.openImportModal = () => {
+function openImportModal() {
   importTextarea.value = "";
   modalImportBg.style.display = "flex";
-};
+}
 
 modalImportBg.addEventListener("click", e => {
   if (e.target === modalImportBg) modalImportBg.style.display = "none";
 });
 
-window.importarLista = () => {
-  let texto = importTextarea.value.trim();
-  if (!texto) return alert("Cole a lista completa.");
+function importarLista() {
+  const texto = importTextarea.value.trim();
+  if (!texto) return alert("Cole o JSON.");
 
   try {
     const json = JSON.parse(texto);
-    if (!Array.isArray(json)) return alert("JSON inválido.");
+    if (!Array.isArray(json)) throw "inválido";
 
     const atuais = PlantoesStore.get();
     const mapa = {};
@@ -342,18 +313,14 @@ window.importarLista = () => {
     atuais.forEach(p => mapa[p.date] = p);
     json.forEach(p => mapa[p.date] = p);
 
-    const merged = Object.values(mapa);
-
-    PlantoesStore.set(merged);
-    alert("Lista importada com sucesso!");
-
+    PlantoesStore.set(Object.values(mapa));
     modalImportBg.style.display = "none";
     renderTabela();
-
+    alert("Lista importada com sucesso!");
   } catch {
-    alert("Erro ao importar. Verifique o JSON.");
+    alert("JSON inválido.");
   }
-};
+}
 </script>
 
 </body>
