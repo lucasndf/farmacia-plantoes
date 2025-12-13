@@ -4,12 +4,12 @@
 
 let editIndex = -1;
 
-// =======================================================
-//  ELEMENTOS
-// =======================================================
+// ELEMENTOS
 const tabela = document.querySelector("#tabela tbody");
 const modalBg = document.getElementById("modalBg");
 const modalImportBg = document.getElementById("modalImportBg");
+const importTextarea = document.getElementById("importTextarea");
+const filtroMes = document.getElementById("filtroMes");
 
 const inpDate = document.getElementById("inpDate");
 const inpFarm = document.getElementById("inpFarm");
@@ -18,28 +18,25 @@ const inpTel = document.getElementById("inpTel");
 const inpArea = document.getElementById("inpArea");
 
 const modalTitle = document.getElementById("modalTitle");
-const importTextarea = document.getElementById("importTextarea");
 
 // =======================================================
-//  ABRIR MODAL (NOVO / EDITAR)
+//  MODAL NOVO / EDITAR
 // =======================================================
 window.openModal = function (index = -1) {
   editIndex = index;
 
   if (index >= 0) {
-    const lista = PlantoesStore.get() || [];
+    const lista = PlantoesStore.get();
     const p = lista[index];
 
     modalTitle.textContent = "Editar Plantão";
-
-    inpDate.value = p.date || "";
-    inpFarm.value = p.farmacia || "";
-    inpEnd.value = p.endereco || "";
-    inpTel.value = p.telefone || "";
-    inpArea.value = p.area || "";
+    inpDate.value = p.date;
+    inpFarm.value = p.farmacia;
+    inpEnd.value = p.endereco;
+    inpTel.value = p.telefone;
+    inpArea.value = p.area;
   } else {
     modalTitle.textContent = "Novo Plantão";
-
     inpDate.value = "";
     inpFarm.value = "";
     inpEnd.value = "";
@@ -50,19 +47,80 @@ window.openModal = function (index = -1) {
   modalBg.style.display = "flex";
 };
 
-// FECHAR MODAL AO CLICAR FORA
 modalBg.addEventListener("click", e => {
   if (e.target === modalBg) modalBg.style.display = "none";
 });
 
 // =======================================================
-//  RENDERIZAR TABELA
+//  MODAL IMPORTAÇÃO
+// =======================================================
+window.openImportModal = function () {
+  importTextarea.value = "";
+  modalImportBg.style.display = "flex";
+};
+
+modalImportBg.addEventListener("click", e => {
+  if (e.target === modalImportBg) modalImportBg.style.display = "none";
+});
+
+window.importarLista = function () {
+  const texto = importTextarea.value.trim();
+  if (!texto) return alert("Cole o JSON da lista.");
+
+  try {
+    const json = JSON.parse(texto);
+    if (!Array.isArray(json)) throw "";
+
+    const atuais = PlantoesStore.get() || [];
+    const mapa = {};
+
+    atuais.forEach(p => mapa[p.date] = p);
+
+    json.forEach(p => {
+      mapa[p.date] = {
+        date: p.date,
+        farmacia: p.farmacia,
+        endereco: p.endereco,
+        telefone: p.telefone,
+        area: p.area.toUpperCase()
+      };
+    });
+
+    PlantoesStore.set(Object.values(mapa));
+    modalImportBg.style.display = "none";
+    atualizarFiltroMes();
+    renderTabela();
+    alert("Lista importada com sucesso!");
+  } catch {
+    alert("JSON inválido.");
+  }
+};
+
+// =======================================================
+//  FILTRO POR MÊS
+// =======================================================
+function atualizarFiltroMes() {
+  const lista = PlantoesStore.get() || [];
+  const meses = [...new Set(lista.map(p => p.date.slice(0, 7)))].sort();
+
+  filtroMes.innerHTML = `<option value="">Todos</option>` +
+    meses.map(m => `<option value="${m}">${m}</option>`).join("");
+}
+
+filtroMes.addEventListener("change", renderTabela);
+
+// =======================================================
+//  RENDER TABELA (COM FILTRO)
 // =======================================================
 function renderTabela() {
-  const lista = PlantoesStore.get() || [];
+  let lista = PlantoesStore.get() || [];
+  const mes = filtroMes.value;
+
+  if (mes) {
+    lista = lista.filter(p => p.date.startsWith(mes));
+  }
 
   tabela.innerHTML = lista
-    .slice()
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((p, i) => `
       <tr>
@@ -79,23 +137,22 @@ function renderTabela() {
     .join("");
 }
 
-window.renderTabela = renderTabela;
-
 // =======================================================
 //  EXCLUIR
 // =======================================================
 window.excluir = function (index) {
   if (!confirm("Tem certeza que deseja excluir este plantão?")) return;
 
-  const lista = PlantoesStore.get() || [];
+  const lista = PlantoesStore.get();
   lista.splice(index, 1);
-
   PlantoesStore.set(lista);
+
+  atualizarFiltroMes();
   renderTabela();
 };
 
 // =======================================================
-//  SALVAR (NOVO / EDITAR)
+//  SALVAR
 // =======================================================
 window.savePlantao = function () {
   const novo = {
@@ -103,7 +160,7 @@ window.savePlantao = function () {
     farmacia: inpFarm.value.trim(),
     endereco: inpEnd.value.trim(),
     telefone: inpTel.value.trim(),
-    area: inpArea.value.trim().toUpperCase(),
+    area: inpArea.value.trim().toUpperCase()
   };
 
   if (!novo.date || !novo.farmacia || !novo.area) {
@@ -111,15 +168,15 @@ window.savePlantao = function () {
     return;
   }
 
-  const lista = PlantoesStore.get() || [];
+  const lista = PlantoesStore.get();
 
   if (editIndex >= 0) {
     lista[editIndex] = novo;
   } else {
-    const existeIndex = lista.findIndex(p => p.date === novo.date);
-    if (existeIndex >= 0) {
-      if (!confirm("Já existe plantão nessa data. Deseja substituir?")) return;
-      lista[existeIndex] = novo;
+    const idx = lista.findIndex(p => p.date === novo.date);
+    if (idx >= 0) {
+      if (!confirm("Já existe plantão nessa data. Substituir?")) return;
+      lista[idx] = novo;
     } else {
       lista.push(novo);
     }
@@ -127,70 +184,12 @@ window.savePlantao = function () {
 
   PlantoesStore.set(lista);
   modalBg.style.display = "none";
+  atualizarFiltroMes();
   renderTabela();
-};
-
-// =======================================================
-//  MODAL DE IMPORTAÇÃO
-// =======================================================
-window.openImportModal = function () {
-  importTextarea.value = "";
-  modalImportBg.style.display = "flex";
-};
-
-// FECHAR MODAL DE IMPORTAÇÃO
-modalImportBg.addEventListener("click", e => {
-  if (e.target === modalImportBg) {
-    modalImportBg.style.display = "none";
-  }
-});
-
-// =======================================================
-//  IMPORTAR LISTA
-// =======================================================
-window.importarLista = function () {
-  const texto = importTextarea.value.trim();
-  if (!texto) {
-    alert("Cole o JSON da lista.");
-    return;
-  }
-
-  let json;
-  try {
-    json = JSON.parse(texto);
-    if (!Array.isArray(json)) throw new Error();
-  } catch {
-    alert("JSON inválido. Verifique o formato.");
-    return;
-  }
-
-  const atuais = PlantoesStore.get() || [];
-  const mapa = {};
-
-  // mantém os atuais
-  atuais.forEach(p => mapa[p.date] = p);
-
-  // adiciona / substitui importados
-  json.forEach(p => {
-    if (!p.date || !p.farmacia || !p.area) return;
-
-    mapa[p.date] = {
-      date: p.date,
-      farmacia: p.farmacia,
-      endereco: p.endereco || "",
-      telefone: p.telefone || "",
-      area: p.area.toUpperCase()
-    };
-  });
-
-  PlantoesStore.set(Object.values(mapa));
-  modalImportBg.style.display = "none";
-  renderTabela();
-
-  alert("Lista importada com sucesso!");
 };
 
 // =======================================================
 //  INIT
 // =======================================================
+atualizarFiltroMes();
 renderTabela();
