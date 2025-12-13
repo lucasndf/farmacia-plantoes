@@ -232,6 +232,24 @@ tr:hover {
     </div>
   </div>
 
+  <!-- FILTRO POR MÊS -->
+  <div style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
+    <label for="filtroMes" style="font-size:0.85rem; color:var(--text-muted);">
+      Filtrar por mês:
+    </label>
+
+    <select id="filtroMes"
+            style="
+              background: var(--card-soft);
+              color: var(--text);
+              border: 1px solid var(--border);
+              border-radius: 8px;
+              padding: 6px 10px;
+            ">
+      <option value="">Todos</option>
+    </select>
+  </div>
+
   <table id="tabela">
     <thead>
       <tr>
