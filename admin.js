@@ -7,7 +7,6 @@ let editIndex = -1;
 // ELEMENTOS
 const tabela = document.querySelector("#tabela tbody");
 const modalBg = document.getElementById("modalBg");
-const modalImportBg = document.getElementById("modalImportBg");
 
 const inpDate = document.getElementById("inpDate");
 const inpFarm = document.getElementById("inpFarm");
@@ -18,7 +17,7 @@ const inpArea = document.getElementById("inpArea");
 const modalTitle = document.getElementById("modalTitle");
 
 // =======================================================
-//  MODAL NOVO / EDITAR
+//  ABRIR MODAL
 // =======================================================
 window.openModal = function (index = -1) {
   editIndex = index;
@@ -26,14 +25,17 @@ window.openModal = function (index = -1) {
   if (index >= 0) {
     const lista = PlantoesStore.get();
     const p = lista[index];
+
     modalTitle.textContent = "Editar Plantão";
-    inpDate.value = p.date;
-    inpFarm.value = p.farmacia;
-    inpEnd.value = p.endereco;
-    inpTel.value = p.telefone;
-    inpArea.value = p.area;
+
+    inpDate.value = p.date || "";
+    inpFarm.value = p.farmacia || "";
+    inpEnd.value = p.endereco || "";
+    inpTel.value = p.telefone || "";
+    inpArea.value = p.area || "";
   } else {
     modalTitle.textContent = "Novo Plantão";
+
     inpDate.value = "";
     inpFarm.value = "";
     inpEnd.value = "";
@@ -44,32 +46,19 @@ window.openModal = function (index = -1) {
   modalBg.style.display = "flex";
 };
 
-// =======================================================
-//  MODAL IMPORTAR (🔥 ESTAVA FALTANDO)
-// =======================================================
-window.openImportModal = function () {
-  document.getElementById("importTextarea").value = "";
-  modalImportBg.style.display = "flex";
-};
-
-// =======================================================
-//  FECHAR MODAIS AO CLICAR FORA
-// =======================================================
+// FECHAR MODAL
 modalBg.addEventListener("click", e => {
   if (e.target === modalBg) modalBg.style.display = "none";
 });
 
-modalImportBg.addEventListener("click", e => {
-  if (e.target === modalImportBg) modalImportBg.style.display = "none";
-});
-
 // =======================================================
-//  RENDER TABELA
+//  RENDERIZAR TABELA  ✅ AGORA GLOBAL
 // =======================================================
 function renderTabela() {
-  const lista = PlantoesStore.get();
+  const lista = PlantoesStore.get() || [];
 
   tabela.innerHTML = lista
+    .slice()
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((p, i) => `
       <tr>
@@ -82,19 +71,22 @@ function renderTabela() {
           <button class="btn-small" onclick="excluir(${i})">Excluir</button>
         </td>
       </tr>
-    `).join("");
+    `)
+    .join("");
 }
 
+// 🔑 EXPÕE PARA O HTML
+window.renderTabela = renderTabela;
+
 // =======================================================
-//  EXCLUIR (CONFIRMAÇÃO CLARA)
+//  EXCLUIR
 // =======================================================
 window.excluir = function (index) {
+  if (!confirm("Tem certeza que deseja excluir este plantão?")) return;
+
   const lista = PlantoesStore.get();
-  const p = lista[index];
-
-  if (!confirm(`Excluir o plantão de ${p.farmacia} em ${p.date}?`)) return;
-
   lista.splice(index, 1);
+
   PlantoesStore.set(lista);
   renderTabela();
 };
@@ -103,11 +95,6 @@ window.excluir = function (index) {
 //  SALVAR
 // =======================================================
 window.savePlantao = function () {
-  if (!inpDate.value || !inpFarm.value || !inpArea.value) {
-    alert("Preencha data, farmácia e área.");
-    return;
-  }
-
   const novo = {
     date: inpDate.value,
     farmacia: inpFarm.value.trim(),
@@ -116,15 +103,20 @@ window.savePlantao = function () {
     area: inpArea.value.trim().toUpperCase(),
   };
 
+  if (!novo.date || !novo.farmacia || !novo.area) {
+    alert("Preencha data, farmácia e área.");
+    return;
+  }
+
   const lista = PlantoesStore.get();
 
   if (editIndex >= 0) {
     lista[editIndex] = novo;
   } else {
-    const idx = lista.findIndex(p => p.date === novo.date);
-    if (idx >= 0) {
-      if (!confirm("Já existe plantão nessa data. Substituir?")) return;
-      lista[idx] = novo;
+    const existe = lista.find(p => p.date === novo.date);
+    if (existe) {
+      if (!confirm("Já existe plantão nessa data. Deseja substituir?")) return;
+      lista[lista.findIndex(p => p.date === novo.date)] = novo;
     } else {
       lista.push(novo);
     }
