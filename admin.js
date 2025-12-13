@@ -131,3 +131,64 @@ window.savePlantao = function () {
 //  INIT
 // =======================================================
 renderTabela();
+
+// =======================================================
+//  IMPORTAÇÃO DE LISTA
+// =======================================================
+
+const modalImportBg = document.getElementById("modalImportBg");
+const importTextarea = document.getElementById("importTextarea");
+
+// ABRIR MODAL DE IMPORTAÇÃO
+window.openImportModal = function () {
+  importTextarea.value = "";
+  modalImportBg.style.display = "flex";
+};
+
+// FECHAR MODAL AO CLICAR FORA
+modalImportBg.addEventListener("click", e => {
+  if (e.target === modalImportBg) {
+    modalImportBg.style.display = "none";
+  }
+});
+
+// IMPORTAR LISTA
+window.importarLista = function () {
+  const texto = importTextarea.value.trim();
+  if (!texto) {
+    alert("Cole o JSON da lista.");
+    return;
+  }
+
+  try {
+    const json = JSON.parse(texto);
+    if (!Array.isArray(json)) throw new Error();
+
+    const atuais = PlantoesStore.get() || [];
+    const mapa = {};
+
+    // mantém os existentes
+    atuais.forEach(p => mapa[p.date] = p);
+
+    // substitui ou adiciona os novos
+    json.forEach(p => {
+      mapa[p.date] = {
+        date: p.date,
+        farmacia: p.farmacia,
+        endereco: p.endereco,
+        telefone: p.telefone,
+        area: p.area.toUpperCase()
+      };
+    });
+
+    PlantoesStore.set(Object.values(mapa));
+    modalImportBg.style.display = "none";
+    renderTabela();
+    alert("Lista importada com sucesso!");
+
+  } catch (e) {
+    alert("JSON inválido.");
+  }
+};
+
+
