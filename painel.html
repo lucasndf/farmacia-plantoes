@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel Administrativo - Plantões Patos</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel Administrativo - Plantões Patos</title>
 
-  <style>
+<style>
 :root {
   --bg: #050812;
   --card: #111729;
@@ -28,7 +28,9 @@ body {
   overflow: hidden;
 }
 
-/* Sidebar */
+/* =====================
+   SIDEBAR / TOPBAR
+   ===================== */
 .sidebar {
   width: 250px;
   background: var(--card);
@@ -45,7 +47,8 @@ body {
   font-weight: 700;
 }
 
-.sidebar button {
+/* BOTÃO SAIR (DESKTOP) */
+.btn-logout {
   background: transparent;
   border: 1px solid var(--border);
   padding: 10px;
@@ -55,12 +58,14 @@ body {
   transition: 0.2s;
 }
 
-.sidebar button:hover {
+.btn-logout:hover {
   color: var(--text);
   border-color: var(--accent);
 }
 
-/* Content */
+/* =====================
+   CONTENT
+   ===================== */
 .content {
   flex: 1;
   padding: 24px;
@@ -94,7 +99,9 @@ body {
   background: var(--accent-hover);
 }
 
-/* Table */
+/* =====================
+   TABLE
+   ===================== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -132,7 +139,9 @@ tr:hover {
   color: #fff;
 }
 
-/* Modal */
+/* =====================
+   MODAL
+   ===================== */
 .modal-bg {
   position: fixed;
   inset: 0;
@@ -162,8 +171,11 @@ tr:hover {
   color: var(--text);
 }
 
-/* Mobile */
+/* =====================
+   MOBILE (CORREÇÃO FINAL)
+   ===================== */
 @media (max-width: 768px) {
+
   body {
     flex-direction: column;
     height: auto;
@@ -172,9 +184,23 @@ tr:hover {
   .sidebar {
     width: 100%;
     flex-direction: row;
+    align-items: center;
     justify-content: space-between;
+    padding: 14px 16px;
     border-right: none;
     border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar h2 {
+    font-size: 1.2rem;
+  }
+
+  /* BOTÃO SAIR MOBILE (AQUI ESTÁ A CORREÇÃO) */
+  .btn-logout {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    border-radius: 999px;
+    white-space: nowrap;
   }
 
   table {
@@ -183,18 +209,18 @@ tr:hover {
     white-space: nowrap;
   }
 }
-  </style>
+</style>
 </head>
 
 <body>
 
-<!-- Sidebar -->
+<!-- SIDEBAR / TOPBAR -->
 <div class="sidebar">
   <h2>Admin</h2>
-  <button onclick="logout()">Sair</button>
+  <button class="btn-logout" onclick="logout()">Sair</button>
 </div>
 
-<!-- Content -->
+<!-- CONTENT -->
 <div class="content">
 
   <div class="topbar">
@@ -221,107 +247,55 @@ tr:hover {
 
 </div>
 
-<!-- Modal Novo/Edit -->
+<!-- MODAIS -->
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h3 id="modalTitle">Novo Plantão</h3>
-
     <input id="inpDate" type="date" />
     <input id="inpFarm" type="text" placeholder="Farmácia" />
     <input id="inpEnd" type="text" placeholder="Endereço" />
     <input id="inpTel" type="text" placeholder="Telefone" />
     <input id="inpArea" type="text" placeholder="Área (CENTRO, NORTE...)" />
-
     <button class="btn-primary" onclick="savePlantao()">Salvar</button>
   </div>
 </div>
 
-<!-- Modal Import -->
 <div class="modal-bg" id="modalImportBg">
   <div class="modal">
     <h3>Importar lista de plantões</h3>
-    <p style="font-size:0.85rem; color:var(--text-muted)">
-      Cole o JSON completo. Datas iguais serão substituídas.
-    </p>
-
     <textarea id="importTextarea" style="height:220px"></textarea>
-
     <button class="btn-primary" onclick="importarLista()">Importar</button>
   </div>
 </div>
 
-<!-- Firebase AUTH (compatível com login) -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAhuIJT5TM0hT_m8S3zNEeZNmM8Ei2qOn8",
-    authDomain: "plantoes-patos.firebaseapp.com",
-    projectId: "plantoes-patos",
-    storageBucket: "plantoes-patos.firebasestorage.app",
-    messagingSenderId: "389722424174",
-    appId: "1:389722424174:web:efa844d12dbc48635b377f"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAhuIJT5TM0hT_m8S3zNEeZNmM8Ei2qOn8",
+  authDomain: "plantoes-patos.firebaseapp.com",
+  projectId: "plantoes-patos",
+  storageBucket: "plantoes-patos.firebasestorage.app",
+  messagingSenderId: "389722424174",
+  appId: "1:389722424174:web:efa844d12dbc48635b377f"
+};
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
-  // 🔒 Proteção de acesso
-  auth.onAuthStateChanged(user => {
-    if (!user) window.location.href = "login.html";
-  });
-
-  function logout() {
-    auth.signOut().then(() => {
-      window.location.href = "login.html";
-    });
-  }
-</script>
-
-<!-- Banco local (CORRIGIDO) -->
-<script src="data.js"></script>
-
-<!-- Admin -->
-<script src="admin.js"></script>
-
-<!-- Importação -->
-<script>
-const modalImportBg = document.getElementById("modalImportBg");
-const importTextarea = document.getElementById("importTextarea");
-
-function openImportModal() {
-  importTextarea.value = "";
-  modalImportBg.style.display = "flex";
-}
-
-modalImportBg.addEventListener("click", e => {
-  if (e.target === modalImportBg) modalImportBg.style.display = "none";
+auth.onAuthStateChanged(user => {
+  if (!user) window.location.href = "login.html";
 });
 
-function importarLista() {
-  const texto = importTextarea.value.trim();
-  if (!texto) return alert("Cole o JSON.");
-
-  try {
-    const json = JSON.parse(texto);
-    if (!Array.isArray(json)) throw "inválido";
-
-    const atuais = PlantoesStore.get();
-    const mapa = {};
-
-    atuais.forEach(p => mapa[p.date] = p);
-    json.forEach(p => mapa[p.date] = p);
-
-    PlantoesStore.set(Object.values(mapa));
-    modalImportBg.style.display = "none";
-    renderTabela();
-    alert("Lista importada com sucesso!");
-  } catch {
-    alert("JSON inválido.");
-  }
+function logout() {
+  auth.signOut().then(() => window.location.href = "login.html");
 }
 </script>
+
+<script src="data.js"></script>
+<script src="admin.js"></script>
 
 </body>
 </html>
