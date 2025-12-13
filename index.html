@@ -1,254 +1,249 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>Farmácia de Plantão em Patos-PB | Hoje</title>
 
-<title>Farmácia de Plantão em Patos-PB — Aberta Agora</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Veja qual farmácia está de plantão hoje em Patos-PB. Endereço, telefone e rota no Google Maps." />
 
-<meta name="description" content="Descubra rapidamente qual farmácia está aberta agora em Patos-PB. Endereço, telefone, WhatsApp e rota no mapa." />
+  <!-- Open Graph (WhatsApp) -->
+  <meta property="og:title" content="Farmácia de Plantão em Patos-PB" />
+  <meta property="og:description" content="Confira agora qual farmácia está de plantão hoje em Patos-PB." />
+  <meta property="og:type" content="website" />
 
-<!-- SEO / Open Graph -->
-<meta property="og:title" content="Farmácia de Plantão em Patos-PB" />
-<meta property="og:description" content="Veja qual farmácia está aberta agora em Patos-PB, com telefone e rota no mapa." />
-<meta property="og:type" content="website" />
-<meta property="og:locale" content="pt_BR" />
+  <link rel="manifest" href="manifest.webmanifest" />
 
-<!-- Manifest PWA -->
-<link rel="manifest" href="manifest.webmanifest" />
+  <style>
+    :root {
+      --bg: #050812;
+      --card: #0f1629;
+      --border: #1e2538;
+      --text: #ffffff;
+      --muted: #9ca7c4;
+      --accent: #3e7bfa;
+      --success: #22c55e;
+      --radius: 16px;
+    }
 
-<!-- Service Worker -->
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
+    * {
+      box-sizing: border-box;
+      font-family: Inter, system-ui, sans-serif;
+    }
 
-<style>
-:root {
-  --bg: #050812;
-  --card: #0e1324;
-  --card2: #12182b;
-  --text: #ffffff;
-  --text-muted: #96a0ba;
-  --accent: #3e7bfa;
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
 
-  --center: #ff6b6b;
-  --norte: #00e676;
-  --leste: #f9a826;
-  --oeste: #00d4ff;
-  --sul: #b388ff;
+    main {
+      width: 100%;
+      max-width: 900px;
+    }
 
-  --radius: 18px;
-}
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      gap: 12px;
+    }
 
-* {
-  box-sizing: border-box;
-  font-family: "Inter", system-ui, sans-serif;
-}
+    header h1 {
+      font-size: 1.9rem;
+      margin: 0;
+      font-weight: 800;
+    }
 
-body {
-  margin: 0;
-  background: radial-gradient(circle at top left, #192444 0%, var(--bg) 45%);
-  color: var(--text);
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-  min-height: 100vh;
-}
+    header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
 
-#app {
-  width: 100%;
-  max-width: 960px;
-}
+    .admin-link {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
 
-/* HEADER */
-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 22px;
-}
+    .admin-link:hover {
+      color: var(--accent);
+    }
 
-header h1 {
-  font-size: 2rem;
-  font-weight: 800;
-}
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+    }
 
-header p {
-  margin-top: 4px;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 999px;
+      background: rgba(62,123,250,.15);
+      color: var(--accent);
+      font-weight: 600;
+      margin-left: 6px;
+    }
 
-.header-right {
-  text-align: right;
-}
+    .pharmacy {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 6px 0 10px;
+    }
 
-.pill {
-  padding: 6px 14px;
-  font-size: 0.82rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148,163,184,.4);
-  color: var(--text-muted);
-}
+    .info {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
 
-.admin-link {
-  display: block;
-  margin-top: 6px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  text-decoration: none;
-}
-.admin-link:hover { color: var(--accent); }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
 
-/* =====================
-   CARD HOJE (DESTAQUE)
-   ===================== */
-.today-card {
-  background: radial-gradient(circle at top right, #23335d 0%, #0b1020 45%);
-  border-radius: 22px;
-  padding: 22px;
-  margin-bottom: 26px;
-  border: 1px solid rgba(62,123,250,.5);
-  box-shadow: 0 0 30px rgba(62,123,250,.25);
-}
+    .btn {
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-.badge-now {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff;
-  padding: 3px 10px;
-  font-size: 0.72rem;
-  border-radius: 999px;
-  margin-left: 6px;
-}
+    .btn-call {
+      background: var(--accent);
+      color: #fff;
+    }
 
-/* LOADING */
-.loading {
-  opacity: .7;
-  font-style: italic;
-}
+    .btn-map {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
 
-/* TAGS */
-.tag {
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(148,163,184,.4);
-  font-size: .8rem;
-}
+    .status {
+      font-size: 0.85rem;
+      color: var(--success);
+      margin-top: 10px;
+    }
 
-.area-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
+    /* Próximos */
+    h2 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+    }
 
-.area-CENTRO { background: var(--center); }
-.area-NORTE  { background: var(--norte); }
-.area-LESTE  { background: var(--leste); }
-.area-OESTE  { background: var(--oeste); }
-.area-SUL    { background: var(--sul); }
+    .next {
+      border-bottom: 1px solid var(--border);
+      padding: 10px 0;
+      font-size: 0.9rem;
+    }
 
-/* BOTÕES */
-.btn {
-  padding: 9px 16px;
-  border-radius: 999px;
-  font-size: .85rem;
-  font-weight: 600;
-  text-decoration: none;
-}
+    footer {
+      margin-top: 28px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
 
-.btn-wpp { background: #25d366; color: #fff; }
-.btn-map { background: #2563eb; color: #fff; }
-.btn-call {
-  background: #111827;
-  color: var(--text-muted);
-  border: 1px solid #374151;
-}
-
-/* FOOTER */
-footer {
-  margin-top: 20px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(148,163,184,.25);
-  font-size: .78rem;
-  color: var(--text-muted);
-}
-</style>
+    @media (max-width: 480px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div id="app">
+<main>
 
-<header>
-  <div>
-    <h1>Farmácia de Plantão</h1>
-    <p>Veja agora qual farmácia está aberta em Patos-PB.</p>
-  </div>
-
-  <div class="header-right">
-    <span class="pill">📍 Patos-PB</span>
+  <header>
+    <div>
+      <h1>Farmácia de Plantão</h1>
+      <p>Confira qual farmácia está atendendo hoje em Patos-PB.</p>
+    </div>
     <a href="login.html" class="admin-link">Área administrativa</a>
-  </div>
-</header>
+  </header>
 
-<section id="todayCard" class="today-card loading">
-  Carregando o plantão de hoje…
-</section>
+  <section id="today" class="card">
+    <p class="info">Carregando plantão de hoje…</p>
+  </section>
 
-<h3>Quem estará de plantão nos próximos dias</h3>
-<section id="nextList"></section>
+  <h2>Próximos plantões</h2>
+  <section id="next"></section>
 
-<footer>
-  Dados fornecidos pelo <strong>PROCON de Patos-PB</strong>.<br>
-  Desenvolvido por <a href="https://lucasndf.github.io/portfolio/" target="_blank">Lucas Nascimento</a>.
-</footer>
+  <footer>
+    Dados oficiais do PROCON de Patos-PB.<br>
+    Desenvolvido por <strong>Lucas Nascimento</strong>.
+  </footer>
 
-</div>
+</main>
 
 <script src="data.js"></script>
-
 <script>
-function renderToday() {
-  const dados = PlantoesStore.get();
-  const hoje = new Date().toISOString().split("T")[0];
-  const entry = dados.find(p => p.date === hoje);
+  function render() {
+    try {
+      const dados = PlantoesStore.get();
+      const hoje = new Date().toISOString().split("T")[0];
 
-  if (!entry) {
-    document.getElementById("todayCard").innerHTML = `
-      <h2>Plantão indisponível</h2>
-      <p>Não encontramos informações para hoje.</p>
-    `;
-    return;
+      const atual = dados.find(d => d.date === hoje);
+      const proximos = dados.filter(d => d.date > hoje).slice(0,5);
+
+      if (!atual) {
+        document.getElementById("today").innerHTML =
+          "<p class='info'>Nenhum plantão encontrado para hoje.</p>";
+        return;
+      }
+
+      document.getElementById("today").innerHTML = `
+        <small class="info">Hoje • ${hoje.split("-").reverse().join("/")}</small>
+        <div class="pharmacy">${atual.farmacia} <span class="badge">HOJE</span></div>
+        <div class="info">📍 ${atual.endereco}</div>
+        <div class="info">📞 ${atual.telefone}</div>
+
+        <div class="actions">
+          <a class="btn btn-call" href="tel:${atual.telefone.replace(/\D/g,"")}">Ligar agora</a>
+          <a class="btn btn-map" target="_blank"
+             href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(atual.endereco + ', Patos - PB')}">
+             Abrir rota
+          </a>
+        </div>
+
+        <div class="status">Plantão em andamento</div>
+      `;
+
+      document.getElementById("next").innerHTML = proximos.map(p => `
+        <div class="next">
+          ${p.date.split("-").reverse().join("/")} — ${p.farmacia}
+        </div>
+      `).join("");
+
+    } catch {
+      document.getElementById("today").innerHTML =
+        "<p class='info'>Não foi possível carregar os dados agora.</p>";
+    }
   }
 
-  document.getElementById("todayCard").innerHTML = `
-    <small>Hoje • ${hoje.split("-").reverse().join("/")}</small>
-    <h2>${entry.farmacia} <span class="badge-now">AGORA</span></h2>
-    <p>📍 ${entry.endereco}</p>
-    <p>📞 ${entry.telefone}</p>
-
-    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-      <a class="btn btn-wpp" href="https://wa.me/55${entry.telefone.replace(/\D/g,"")}" target="_blank">WhatsApp</a>
-      <a class="btn btn-map" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(entry.endereco + ', Patos - PB')}" target="_blank">Ver rota</a>
-    </div>
-  `;
-}
-
-function renderNext() {
-  const dados = PlantoesStore.get();
-  const hoje = new Date().toISOString().split("T")[0];
-
-  document.getElementById("nextList").innerHTML = dados
-    .filter(p => p.date > hoje)
-    .slice(0,5)
-    .map(p => `<p>${p.date.split("-").reverse().join("/")} — ${p.farmacia}</p>`)
-    .join("");
-}
-
-renderToday();
-renderNext();
+  render();
 </script>
 
 </body>
