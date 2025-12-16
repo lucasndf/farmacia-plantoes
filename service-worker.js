@@ -1,6 +1,5 @@
 // ======================================================
 // Service Worker — Farmácia de Plantão Patos-PB
-// Compatível com GitHub Pages
 // ======================================================
 
 const CACHE_NAME = "plantoes-patos-v2";
@@ -55,3 +54,4 @@ self.addEventListener("fetch", event => {
     })
   );
 });
+
