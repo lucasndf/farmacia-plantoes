@@ -212,7 +212,7 @@
     }
 
     /* ======================================
-       CARD HOJE (seu original)
+       CARD HOJE
        ====================================== */
     .today-card {
       background: radial-gradient(circle at top right, #23335d 0%, #0b1020 45%);
@@ -226,7 +226,7 @@
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
     }
 
-    /* 🟠 destaque HOJE mais forte (sem ficar feio) */
+    /* 🟠 destaque HOJE mais forte */
     .today-card.is-today {
       border-color: rgba(62,123,250,0.55);
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 4px rgba(62,123,250,0.12);
@@ -405,7 +405,7 @@
       color: var(--text-muted);
     }
 
-    /* ✅ agora existe o estilo do action-link */
+    /* estilo do action-link */
     .next-actions {
       display: flex;
       flex-direction: column;
@@ -448,7 +448,7 @@
     }
 
     /* ======================================
-       📱 MOBILE RESPONSIVE (seu original)
+       📱 MOBILE RESPONSIVE
        ====================================== */
     @media (max-width: 480px) {
 
@@ -610,7 +610,7 @@ function showError(message) {
 }
 
 /* =========================================================
-   TELEFONES: separar fixos e móveis (seu original)
+   TELEFONES: separar fixos e móveis
    ========================================================= */
 function parsePhones(raw) {
   const arr = raw.split("/").map(x => x.trim()).filter(Boolean);
@@ -626,7 +626,7 @@ function parsePhones(raw) {
 }
 
 /* =========================================================
-   TEMPO RESTANTE (seu original)
+   TEMPO RESTANTE
    ========================================================= */
 function calculaTempoRestanteCorrigido() {
   const agora = new Date();
@@ -660,15 +660,15 @@ function calculaTempoRestanteCorrigido() {
     texto = "Plantão encerrado";
   }
 
-  const refTexto = isWeekend
-    ? "Finais de semana: 22h às 06h"
-    : "Segunda a sexta: 23h às 06h";
+const refTexto = isWeekend
+  ? "Horário de plantão — finais de semana: 22h às 06h"
+  : "Horário de plantão — segunda a sexta: 23h às 06h";
 
   return { texto, refTexto };
 }
 
 /* =========================================================
-   🟠 Microcopy humana (sem mudar seu layout)
+   🟠 Microcopy
    ========================================================= */
 function getHumanSubtitle() {
   const agora = new Date();
@@ -680,7 +680,7 @@ function getHumanSubtitle() {
 }
 
 /* =========================================================
-   RENDER HOJE (seu original + HOJE mais forte)
+   RENDER HOJE
    ========================================================= */
 function renderToday() {
   const dados = window.PlantoesStore.get();
@@ -721,7 +721,7 @@ function renderToday() {
 
           <div class="tag tag-now">
             <span class="pulse-dot"></span>
-            HOJE (agora)
+            HOJE
           </div>
         </div>
 
@@ -757,7 +757,7 @@ function renderToday() {
 }
 
 /* =========================================================
-   RENDER PRÓXIMOS (seu original + link bonito)
+   RENDER PRÓXIMOS
    ========================================================= */
 function renderNext() {
   const dados = window.PlantoesStore.get();
@@ -807,7 +807,7 @@ function renderNext() {
 }
 
 /* =========================================================
-   🔴 2) Boot com loading + try/catch (sem gambiarra)
+   🔴 2) Boot com loading + try/catch
    ========================================================= */
 function boot() {
   showLoading();
@@ -843,4 +843,3 @@ setInterval(() => {
 
 </body>
 </html>
-
